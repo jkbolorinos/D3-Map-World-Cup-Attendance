@@ -1,0 +1,5 @@
+Thematic Mapping
+	- Dot Maps - can leverage negative space
+	- Choropleth maps - color areas (countries, states)
+	- Cartogram - distorts area, shapes and sizes depending on some data value
+	- Graduated symbol map - areas of symbols vary depending on the data they represent  

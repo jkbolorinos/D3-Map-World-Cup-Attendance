@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+      <style type="text/css">
+
+      </style>
+
+    <script type="text/javascript">
+      
+      /* Function that takes a single argument, geo_data, 
+      named so because it will be passed geojson file 
+      -- OGR can be used to generate GEOjson files http://ogre.adc4gis.com/ -- */
+      function draw(geo_data) {
+        "use strict";
+        /* Setup margins for chart */
+        var margin = 75,
+          width = 1920 - margin,
+          height = 1080 - margin;
+
+        /* Append and svg element to page 
+        */
+        var svg = d3.select("body")
+        .append("svg")
+        /* set margins */
+        .attr("width", width + margin)
+        .attr("height", height + margin)
+        /* append container element to group related elements together (not d3 specific)*/
+        .append('g')
+        .attr('class', 'map');
+      
+        debugger;
+
+        /* Setup mercator projection -- similar to d3 scales, given coordinates (lat, long) it returns pixel domain */
+        var projection = d3.geo.mercator()
+                              /* Scale = Zoom buttons, translate = dragging center of the map */
+                               .scale(220)
+                               .translate([width/2, height/1.5]);
+
+        /* Construct svg object to correctly render pixels from mercator projection */
+        var path = d3.geo.path().projection(projection);
+
+        /* Put all the pieces together to actually draw data -- Select all paths and bind the geojson data
+        to empty selection. */
+        var map = svg.selectAll('path')
+        /* Features is a key corresponds to array of country coordinates */
+               .data(geo_data.features)
+               /* Enter selection selects all the paths of countries (which are currently just placeholders) and for each appends a path */
+               .enter()
+               .append('path')
+               /* d = data of the path, path returns funtion (since no parenthesis used) */
+               .attr('d', path)
+               .style('fill', 'rgb(9,157,217)')
+               .style('stroke','black')
+               .style('stroke-width', 0.5);
+
+        function plot_points(data) {
+
+        };
+
+        var format = d3.time.format("%d-%m-%Y (%H:%M h)");
+
+        d3.tsv("world_cup_geo.tsv", function(d) {
+          d['attendance'] = +d['attendance'];
+          d['date'] = format.parse(d['date']);
+          return d;
+        }, plot_points);
+
+      };
+    </script>
+  </head>
+
+  <body>
+    <script type="text/javascript">
+
+      d3.json("world_countries.json", draw);
+    </script>
+
+  </body>
+</html>
