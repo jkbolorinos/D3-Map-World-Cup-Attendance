@@ -29,8 +29,6 @@
         /* append container element to group related elements together (not d3 specific)*/
         .append('g')
         .attr('class', 'map');
-      
-        debugger;
 
         /* Setup mercator projection -- similar to d3 scales, given coordinates (lat, long) it returns pixel domain */
         var projection = d3.geo.mercator()
@@ -56,11 +54,54 @@
                .style('stroke-width', 0.5);
 
         function plot_points(data) {
+            /* draw circles */
 
+            /* Group data using d3 nest() function */
+            var nested = d3.nest()
+                            /* key() specifies how to group data, returns value that nest groups by */
+                           .key(function(d) {
+                              return d['date'].getUTCFullYear();
+                           })
+                           /* rollup() is passed a nested and hierarchical set of data organized (aggregation) */
+                           .rollup(function(leaves){
+                              /* d3.sum() takes in array or list like object, and accessor function that defines what to sum */
+
+                              /* Sum of attendance */
+                              var total = d3.sum(leaves, function(d) {
+                                return d['attendance'];
+                              });
+
+                              /* Longitute data and latitude */
+                              var coords = leaves.map(function(d) {
+                                return projection([+d.long, +d.lat])
+                              });
+
+                              /* Compute mean latitude and longitude for x */
+                              var center_x = d3.mean(coords, function(d) {
+                                return d[0];
+                              });
+
+                              /* Compute mean latitude and longitude for y */
+                              var center_y = d3.mean(coords, function(d) {
+                                return d[1];
+                              });
+
+                              return {
+                                'attendance' : total,
+                                'x' : center_x,
+                                'y' : center_y
+                              };
+                           })
+                           .entries(data);
+
+
+                              debugger;
+            
         };
 
         var format = d3.time.format("%d-%m-%Y (%H:%M h)");
 
+        /* Data transform funtion to convert attendance to integer, and date to a javascript date type */
         d3.tsv("world_cup_geo.tsv", function(d) {
           d['attendance'] = +d['attendance'];
           d['date'] = format.parse(d['date']);
