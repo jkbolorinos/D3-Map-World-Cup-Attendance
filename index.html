@@ -95,7 +95,16 @@
                            /* rollup() is passed a nested and hierarchical set of data organized (aggregation) */
                            .rollup(agg_year)
                            .entries(data);
-                              debugger;
+
+            /* Accessor function for attendance data usint extent() */               
+            var attendance_extent = d3.extent(nested, function(d) {
+                return d.values['attendance'];
+            });
+
+            /* Scale attendance data to make circle size accurate */
+            var radius = d3.scale.sqrt()
+                           .domain(attendance_extent)
+                           .range([0,12]);
 
             svg.append('g')
                .attr("class", "bubble")
@@ -105,7 +114,9 @@
                .append("circle")
                .attr('cx', function(d) {return d.values['x'];})
                .attr('cy', function(d) { return d.values['y'];})
-               .attr('r', 5);
+               .attr('r', function(d) {
+                return radius(d.values['attendance']);
+               });
         }
 
         var format = d3.time.format("%d-%m-%Y (%H:%M h)");
