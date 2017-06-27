@@ -8,41 +8,38 @@
       </style>
 
     <script type="text/javascript">
-      
       /* Function that takes a single argument, geo_data, 
       named so because it will be passed geojson file 
       -- OGR can be used to generate GEOjson files http://ogre.adc4gis.com/ -- */
       function draw(geo_data) {
         "use strict";
+
         /* Setup margins for chart */
         var margin = 75,
-            width = 1920 - margin,
-            height = 1080 - margin;
+            width = 1400 - margin,
+            height = 600 - margin;
 
-        /* Append and svg element to page 
-        */
+        /* Append an empty svg element to page. Use .append('g') to group svg shapes 
+        together so that transformations can be applied to all items in group */
         var svg = d3.select("body")
                     .append("svg")
-                    /* set margins */
                     .attr("width", width + margin)
                     .attr("height", height + margin)
-                    /* append container element to group related elements together (not d3 specific)*/
                     .append('g')
                     .attr('class', 'map');
 
-        /* Setup mercator projection -- similar to d3 scales, given coordinates (lat, long) it returns pixel domain */
+        /* Setup mercator projection, given coordinates (lat, long) it returns pixel 
+        domain. Scale = Zoom buttons. Translate = dragging center of the map */
         var projection = d3.geo.mercator()
-                              /* Scale = Zoom buttons, translate = dragging center of the map */
                                .scale(220)
                                .translate([width/2, height/1.3]);
 
         /* Construct svg object to correctly render pixels from mercator projection */
         var path = d3.geo.path().projection(projection);
 
-        /* Put all the pieces together to actually draw data -- Select all paths and bind the geojson data
-        to empty selection. */
+        /* Select all paths and bind the geojson data to empty selection. Features is 
+        a key that corresponds to array of country coordinates in GeoJSON file */
         var map = svg.selectAll('path')
-        /* Features is a key corresponds to array of country coordinates */
                      .data(geo_data.features)
                      /* Enter selection selects all the paths of countries (which are currently just placeholders) and for each appends a path */
                      .enter()
@@ -78,10 +75,20 @@
                 return d[1];
               });
 
+              /* set() function is a collection of unique objects, so if an item is added that is not present it does not add a dupliccate */
+              var teams = d3.set()
+
+              /* iterate through teams for a given year and adds teams to set */
+              leaves.forEach(function(d) {
+                teams.add(d['team1']);
+                teams.add(d['team2']);
+              })
+
               return {
                 'attendance' : total,
                 'x' : center_x,
                 'y' : center_y
+                'teams' : teams.values()
               };
            }
                            
@@ -106,9 +113,14 @@
                            .domain(attendance_extent)
                            .range([0,12]);
 
+           /* Append circles to svg element */
             svg.append('g')
                .attr("class", "bubble")
                .selectAll("circle")
+               /* To ensure larger circles do not cover smaller circles when drawn, order circles by size */
+               .data(nested.sort(function(a,b) {
+                  return b.values['attendance'] - a.values['attendance'];
+               }))
                .data(nested)
                .enter()
                .append("circle")
@@ -116,8 +128,28 @@
                .attr('cy', function(d) { return d.values['y'];})
                .attr('r', function(d) {
                 return radius(d.values['attendance']);
-               });
+               })
+               .attr('fill', 'rgb(247, 148, 32)')
+               .attr('stroke', 'black')
+               .attr('stroke-width', 0.7)
+               .attr('opacity', 0.7);
         }
+
+        /* Function for updating data for a given year */
+        function update(year) {
+            
+            /* Filter data, key = year, filter function strips out key and compare it to year variable */
+            var filtered = nested.filter(function(d) {
+              return new Date(d['key']).getUTCFullYear === year;
+            });
+
+            /* Remove any elements */
+            
+
+            /* Add any new elements */
+
+
+        };
 
         var format = d3.time.format("%d-%m-%Y (%H:%M h)");
 
