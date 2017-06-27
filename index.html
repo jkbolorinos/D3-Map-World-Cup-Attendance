@@ -62,7 +62,7 @@
 
               /* Longitute data and latitude */
               var coords = leaves.map(function(d) {
-                return projection([+d.long, +d.lat])
+                return projection([+d.long, +d.lat]);
               });
 
               /* Compute mean latitude and longitude for x */
@@ -77,20 +77,19 @@
 
               /* set() function is a collection of unique objects, so if an item is added that is not present it does not add a dupliccate */
               var teams = d3.set()
-
               /* iterate through teams for a given year and adds teams to set */
               leaves.forEach(function(d) {
                 teams.add(d['team1']);
                 teams.add(d['team2']);
-              })
+              });
 
               return {
                 'attendance' : total,
                 'x' : center_x,
-                'y' : center_y
+                'y' : center_y,
                 'teams' : teams.values()
               };
-           }
+           };
                            
                         
             /* Group data using d3 nest() function */
@@ -140,7 +139,7 @@
             
             /* Filter data, key = year, filter function strips out key and compare it to year variable */
             var filtered = nested.filter(function(d) {
-              return new Date(d['key']).getUTCFullYear === year;
+              return new Date(d['key']).getUTCFullYear() === year;
             });
 
             /* Remove any elements */
@@ -160,6 +159,8 @@
           return d;
         }, plot_points);
 
+        debugger;
+
       };
     </script>
   </head>
@@ -168,6 +169,7 @@
     <script type="text/javascript">
 
       d3.json("world_countries.json", draw);
+    
     </script>
 
   </body>
